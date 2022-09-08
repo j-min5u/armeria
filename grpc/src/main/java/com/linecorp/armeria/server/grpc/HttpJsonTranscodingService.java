@@ -120,6 +120,7 @@ import io.netty.util.internal.StringUtil;
  */
 final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
         implements HttpEndpointSupport {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpJsonTranscodingService.class);
 
     /**
@@ -127,9 +128,11 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
      * to support HTTP/JSON to gRPC transcoding, a new {@link HttpJsonTranscodingService} instance
      * would be returned. Otherwise, the {@code delegate} would be returned.
      */
-    static GrpcService of(GrpcService delegate, UnframedGrpcErrorHandler unframedGrpcErrorHandler) {
+    static GrpcService of(GrpcService delegate, UnframedGrpcErrorHandler unframedGrpcErrorHandler,
+                          HttpJsonTranscodingOptions httpJsonTranscodingOptions) {
         requireNonNull(delegate, "delegate");
         requireNonNull(unframedGrpcErrorHandler, "unframedGrpcErrorHandler");
+        requireNonNull(httpJsonTranscodingOptions, "httpJsonTranscodingOptions");
 
         final Map<Route, TranscodingSpec> specs = new HashMap<>();
 
