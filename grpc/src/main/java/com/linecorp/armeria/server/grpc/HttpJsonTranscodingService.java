@@ -170,7 +170,7 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
                 final Route route = routeAndVariables.getKey();
                 final List<PathVariable> pathVariables = routeAndVariables.getValue();
                 final Map<String, Field> fields =
-                        buildFields(methodDesc.getInputType(), ImmutableList.of(), ImmutableSet.of());
+                        buildFields(methodDesc.getInputType(), ImmutableList.of(), ImmutableSet.of(), httpJsonTranscodingOptions.camelCaseQueryParams());
 
                 if (specs.containsKey(route)) {
                     logger.warn("{} is not added because the route is duplicate: {}", httpRule, route);
@@ -290,7 +290,8 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
 
     private static Map<String, Field> buildFields(Descriptor desc,
                                                   List<String> parentNames,
-                                                  Set<Descriptor> visitedTypes) {
+                                                  Set<Descriptor> visitedTypes,
+                                                  boolean useCamelCaseKeys) {
         final StringJoiner namePrefixJoiner = new StringJoiner(".");
         parentNames.forEach(namePrefixJoiner::add);
         final String namePrefix = namePrefixJoiner.length() == 0 ? "" : namePrefixJoiner.toString() + '.';
@@ -298,6 +299,10 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
         final ImmutableMap.Builder<String, Field> builder = ImmutableMap.builder();
         desc.getFields().forEach(field -> {
             final JavaType type = field.getJavaType();
+            String key = namePrefix + field.getName();
+            if (useCamelCaseKeys) {
+                key = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
+            }
             switch (type) {
                 case INT:
                 case LONG:
@@ -355,7 +360,8 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
                                                    ImmutableSet.<Descriptor>builder()
                                                                .addAll(visitedTypes)
                                                                .add(field.getMessageType())
-                                                               .build()));
+                                                               .build(),
+                                                   useCamelCaseKeys));
                     } catch (RecursiveTypeException e) {
                         if (e.recursiveTypeDescriptor() != field.getMessageType()) {
                             // Re-throw the exception if it is not caused by my field.
