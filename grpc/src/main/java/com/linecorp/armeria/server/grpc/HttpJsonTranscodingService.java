@@ -120,6 +120,7 @@ import io.netty.util.internal.StringUtil;
  */
 final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
         implements HttpEndpointSupport {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpJsonTranscodingService.class);
 
     /**
@@ -171,7 +172,6 @@ final class HttpJsonTranscodingService extends AbstractUnframedGrpcService
                 final Map<String, Field> fields =
                         buildFields(methodDesc.getInputType(), ImmutableList.of(), ImmutableSet.of(),
                                     httpJsonTranscodingOptions.camelCaseQueryParams());
-
                 if (specs.containsKey(route)) {
                     logger.warn("{} is not added because the route is duplicate: {}", httpRule, route);
                     continue;
